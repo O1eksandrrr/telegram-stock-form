@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Update Stock</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      padding: 20px;
+      max-width: 500px;
+      margin: auto;
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .product-row {
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+    }
+    label {
+      flex: 1;
+    }
+    input[type="number"] {
+      width: 80px;
+      padding: 4px;
+    }
+    button {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      background-color: #30a9de;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      margin-top: 20px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h2>Stock Update</h2>
+  <form id="stockForm">
+    <div id="productFields"></div>
+    <button type="submit">Submit</button>
+  </form>
+
+  <script>
+    const apiURL = "https://script.google.com/macros/s/AKfycbyFgRJhqDOUWLbe_IVV_gFBksIJLqtFiIiDaCygcVy6Ii9twMXy3gs12J8x2k5JzOA4/exec";
+
+    async function loadProducts() {
+      try {
+        const response = await fetch(apiURL);
+        const products = await response.json();
+        const container = document.getElementById("productFields");
+
+        products.forEach(product => {
+          const div = document.createElement("div");
+          div.className = "product-row";
+          div.innerHTML = `
+            <label>${product}</label>
+            <input type="number" name="${product}" min="0" value="0" required>
+          `;
+          container.appendChild(div);
+        });
+      } catch (error) {
+        alert("Failed to load product list.");
+        console.error(error);
+      }
+    }
+
+    document.getElementById("stockForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const stockData = {};
+
+      for (const [key, value] of formData.entries()) {
+        stockData[key] = parseInt(value);
+      }
+
+      Telegram.WebApp.sendData(JSON.stringify(stockData));
+      Telegram.WebApp.close();
+    });
+
+    loadProducts();
+  </script>
+</body>
+</html>
