@@ -45,6 +45,13 @@
       font-style: italic;
       color: #888;
     }
+    #successMsg {
+      display: none;
+      text-align: center;
+      color: green;
+      font-weight: bold;
+      margin-top: 20px;
+    }
   </style>
 </head>
 <body>
@@ -54,9 +61,11 @@
     <div id="productFields"></div>
     <button type="submit" id="submitBtn">Submit</button>
   </form>
+  <div id="successMsg">✅ Data sent successfully!</div>
 
   <script>
     const apiURL = "https://script.google.com/macros/s/AKfycbworT-i-sr_jazEGddkNVAbDTWuzDqQuCGQOrGwMi57EyBwdzqF8QO2WmvLPTllegFu/exec";
+    const webhookURL = "https://firstbs.app.n8n.cloud/webhook/9202bdb6-cec6-45b0-a0a4-76a17c6cc79c";
 
     async function loadProducts() {
       try {
@@ -83,17 +92,36 @@
       }
     }
 
-    document.getElementById("stockForm").addEventListener("submit", function(e) {
+    document.getElementById("stockForm").addEventListener("submit", async function(e) {
       e.preventDefault();
       const formData = new FormData(e.target);
       const stockData = {};
 
       for (const [key, value] of formData.entries()) {
-        stockData[key] = parseInt(value);
+        if (value !== "") {
+          stockData[key] = parseInt(value);
+        }
       }
 
-      Telegram.WebApp.sendData(JSON.stringify(stockData));
-      Telegram.WebApp.close();
+      try {
+        const res = await fetch(webhookURL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(stockData)
+        });
+
+        if (res.ok) {
+          document.getElementById("stockForm").style.display = "none";
+          document.getElementById("successMsg").style.display = "block";
+        } else {
+          alert("❌ Failed to send data");
+        }
+      } catch (err) {
+        console.error(err);
+        alert("❌ Error while sending data");
+      }
     });
 
     loadProducts();
