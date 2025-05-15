@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Update Stock</title>
+  <title>Stock Update</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     body {
@@ -29,7 +29,7 @@
       padding: 4px;
     }
     button {
-      display: block;
+      display: none;
       width: 100%;
       padding: 10px;
       font-size: 16px;
@@ -40,13 +40,19 @@
       margin-top: 20px;
       cursor: pointer;
     }
+    #loading {
+      text-align: center;
+      font-style: italic;
+      color: #888;
+    }
   </style>
 </head>
 <body>
   <h2>Stock Update</h2>
-  <form id="stockForm">
+  <div id="loading">Loading products...</div>
+  <form id="stockForm" style="display:none;">
     <div id="productFields"></div>
-    <button type="submit">Submit</button>
+    <button type="submit" id="submitBtn">Submit</button>
   </form>
 
   <script>
@@ -67,8 +73,12 @@
           `;
           container.appendChild(div);
         });
+
+        document.getElementById("loading").style.display = "none";
+        document.getElementById("stockForm").style.display = "block";
+        document.getElementById("submitBtn").style.display = "block";
       } catch (error) {
-        alert("Failed to load product list.");
+        document.getElementById("loading").innerText = "❌ Failed to load product list.";
         console.error(error);
       }
     }
